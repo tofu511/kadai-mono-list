@@ -47,6 +47,14 @@ footer {
    background-color: #ed486f;
    border-color: #ed486f;
 }
+.cover .btn-success:hover {
+    background-color: #ed486f;
+    border-color: #ed486f;
+}
+.cover .btn-success:active {
+    background-color: #ed486f;
+    border-color: #ed486f;
+}
 
 /* search */
 .search {
@@ -110,4 +118,14 @@ p.item-title {
 /* alert */
 div.alert {
     margin-bottom: 40px;
+}
+
+/* button */
+div .panel-body .btn-success {
+    background-color: #ed486f;
+    border-color: #ed486f;
+}
+div .panel-body .btn-success:active {
+   background-color: #ed486f;
+   border-color: #ed486f;
 }

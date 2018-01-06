@@ -1,4 +1,4 @@
-@(title: String)(content: Html)(implicit messages: Messages, flash: Flash, request: RequestHeader)
+@(title: String, currentUserOpt: Option[User])(content: Html)(implicit messages: Messages, flash: Flash, request: RequestHeader)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +16,7 @@
 
     </head>
     <body>
-        @common.navbar()
+        @common.navbar(currentUserOpt)
         <div class="container">
             @common.messages()
             @content
