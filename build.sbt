@@ -58,7 +58,7 @@ libraryDependencies ++= Seq(
 )
 
 // Adds additional packages into Twirl
-// TwirlKeys.templateImports ++= Seq(...)
+TwirlKeys.templateImports ++= Seq("forms._")
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.example.binders._"

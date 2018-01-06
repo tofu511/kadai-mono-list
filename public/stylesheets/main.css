@@ -106,3 +106,8 @@ p.item-title {
 .user-profile .status ul li .status-value {
    font-size: 18px;
 }
+
+/* alert */
+div.alert {
+    margin-bottom: 40px;
+}
