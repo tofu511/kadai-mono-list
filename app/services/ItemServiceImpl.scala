@@ -3,7 +3,7 @@ import java.time.ZonedDateTime
 import javax.inject.{ Inject, Singleton }
 
 import akka.actor.ActorSystem
-import models.Item
+import models.{ Item, ItemUser }
 import play.api.Configuration
 import play.api.libs.concurrent.ActorSystemProvider
 import com.github.j5ik2o.rakutenApi.itemSearch.{
@@ -12,9 +12,11 @@ import com.github.j5ik2o.rakutenApi.itemSearch.{
   RakutenItemSearchAPIConfig,
   Item => RakutenItem
 }
+import scalikejdbc.{ sqls, DBSession }
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.Try
 
 @Singleton
 class ItemServiceImpl @Inject()(configuration: Configuration, actorSystemProvider: ActorSystemProvider)
@@ -47,17 +49,68 @@ class ItemServiceImpl @Inject()(configuration: Configuration, actorSystemProvide
       .getOrElse(Future.successful(Seq.empty))
   }
 
+  // 楽天の検索結果にあるitemCodeからItemを検索
+  // あればそれを返し、なければcreateItemFromRakutenItemメソッドで新しく作る
+  // ただし、保存はしない
   private def convertToItem(rakutenItem: RakutenItem): Item = {
+    Item.allAssociations
+      .findBy(sqls.eq(Item.defaultAlias.code, rakutenItem.value.itemCode))
+      .getOrElse(
+        createItemFromRakutenItem(rakutenItem)
+      )
+  }
+
+  override def getItemByCode(itemCode: String)(implicit dBSession: DBSession): Future[Option[Item]] = Future {
+    Item.allAssociations.findBy(sqls.eq(Item.defaultAlias.code, itemCode))
+  }
+
+  override def getItemAndCreateByCode(itemCode: String)(implicit dBSession: DBSession): Future[Item] = {
+    getItemByCode(itemCode).flatMap {
+      case Some(item) => Future.successful(item)
+      case None =>
+        searchItemByItemCode(itemCode).map { item =>
+          val id = create(item).get
+          item.copy(id = Some(id))
+        }
+    }
+  }
+
+  // itemCodeから楽天商品を検索する
+  private def searchItemByItemCode(itemCode: String): Future[Item] =
+    rakutenItemSearchAPI.searchItems(itemCode = Some(itemCode)).map(_.Items.head).map(createItemFromRakutenItem)
+
+  // 楽天の検索結果をItemに変換するメソッド
+  private def createItemFromRakutenItem(rakutenItem: RakutenItem): Item = {
     val now = ZonedDateTime.now()
     Item(
       id = None,
       code = rakutenItem.value.itemCode,
       name = rakutenItem.value.itemName,
       url = rakutenItem.value.itemUrl.toString,
-      imageUrl = rakutenItem.value.mediumImageUrls.head.value.toString().replace("?_ex=128x128", ""), // サイズ指定なしの画像に加工する
+      imageUrl = rakutenItem.value.mediumImageUrls.head.value.toString.replace("?_ex=128x128", ""),
       price = rakutenItem.value.itemPrice.toInt,
       createAt = now,
       updateAt = now
     )
+  }
+
+  private def create(item: Item)(implicit dBSession: DBSession): Try[Long] = Try {
+    Item.create(item)
+  }
+
+  override def getItemsByUserId(userId: Long)(implicit dBSession: DBSession): Try[Seq[Item]] = Try {
+    Item.allAssociations.findAllBy(
+      sqls.eq(ItemUser.defaultAlias.userId, userId)
+    )
+  }
+
+  override def getItemById(itemId: Long)(implicit dBSession: DBSession): Future[Option[Item]] = Future {
+    Item.allAssociations.findById(itemId)
+  }
+
+  override def getLatestItems(limit: Int = 20): Try[Seq[Item]] = Try {
+    Item.allAssociations
+      .findAllWithLimitOffset(limit, orderings = Seq(Item.defaultAlias.updateAt.desc))
+      .toVector
   }
 }

@@ -3,9 +3,10 @@ package models
 import java.time.ZonedDateTime
 
 import jp.t2v.lab.play2.pager.{ OrderType, Sortable }
-import scalikejdbc._
-import jsr310._
+import scalikejdbc._, jsr310._
 import skinny.orm._
+import skinny.orm.feature.CRUDFeatureWithId
+import skinny.orm.feature.associations.HasManyAssociation
 
 /**
   * Item
@@ -17,16 +18,35 @@ case class Item(id: Option[Long],
                 imageUrl: String,
                 price: Int,
                 createAt: ZonedDateTime = ZonedDateTime.now(),
-                updateAt: ZonedDateTime = ZonedDateTime.now())
+                updateAt: ZonedDateTime = ZonedDateTime.now(),
+                users: Seq[User] = Seq.empty,
+                wantUsers: Seq[User] = Seq.empty)
 
 object Item extends SkinnyCRUDMapper[Item] {
 
-  override val tableName = "items"
+  lazy val allAssociations: CRUDFeatureWithId[Long, Item] = joins(allUsersRef, wantUsersRef)
+
+  val allUsersRef: HasManyAssociation[Item] = hasManyThrough[User](
+    through = ItemUser, // 中間テーブルを指定
+    many = User,
+    merge = (item, users) => item.copy(users = users)
+  )
+
+  val wantUsersRef: HasManyAssociation[Item] = hasManyThrough[ItemUser, User](
+    through = ItemUser -> ItemUser.defaultAlias, // 中間テーブルを指定
+    throughOn = (item: Alias[Item], itemUser: Alias[ItemUser]) => sqls.eq(item.id, itemUser.itemId),
+    many = User -> User.createAlias("i_in_u_want"),
+    on = (itemUser: Alias[ItemUser], user: Alias[User]) =>
+      sqls.eq(itemUser.userId, user.id).and.eq(itemUser.`type`, WantHaveType.Want.toString), // 結合条件を指定
+    merge = (item, wantUsers) => item.copy(wantUsers = wantUsers)
+  )
+
+  override def tableName: String = "items"
 
   override def defaultAlias: Alias[Item] = createAlias("i")
 
   override def extract(rs: WrappedResultSet, n: ResultName[Item]): Item =
-    autoConstruct(rs, n)
+    autoConstruct(rs, n, "users", "wantUsers")
 
   private def toNamedValues(record: Item): Seq[(Symbol, Any)] = Seq(
     'code     -> record.code,
