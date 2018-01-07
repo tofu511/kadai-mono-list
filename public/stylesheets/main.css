@@ -129,3 +129,8 @@ div .panel-body .btn-success:active {
    background-color: #ed486f;
    border-color: #ed486f;
 }
+
+div .form-group .btn-success {
+    background-color: #ed486f;
+    border-color: #ed486f;
+}
