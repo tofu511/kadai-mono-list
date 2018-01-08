@@ -20,6 +20,27 @@ function want(sender, itemCode) {
     });
 }
 
+function have(sender, itemCode) {
+    var route = jsRoutes.controllers.ItemUserController.have();
+    $.ajax({
+        url: route.url,
+        type: route.type,
+        data: {
+            "itemCode": itemCode
+        },
+        success: function(data) {
+            $(sender).removeClass("btn-primary");
+            $(sender).addClass("btn-success");
+            $(sender).text("Have");
+            $(sender).off('click');
+            $(sender).on('click', function(e) { doNotHave($(sender), itemCode); });
+        },
+        error: function (xhr) {
+            alert("Error!: " + xhr.responseText)
+        }
+    });
+}
+
 function doNotWant(sender, itemCode) {
     var route = jsRoutes.controllers.ItemUserController.doNotWant();
     $.ajax({
@@ -39,5 +60,26 @@ function doNotWant(sender, itemCode) {
             alert("Error!: " + xhr.responseText)
         }
 
+    });
+}
+
+function doNotHave(sender, itemCode) {
+    var route = jsRoutes.controllers.ItemUserController.doNotHave();
+    $.ajax({
+        url: route.url,
+        type: route.type,
+        data: {
+            "itemCode": itemCode
+        },
+        success: function(data) {
+            $(sender).removeClass("btn-success");
+            $(sender).addClass("btn-primary");
+            $(sender).text("Have It");
+            $(sender).off('click');
+            $(sender).on('click', function(e) { have($(sender), itemCode); });
+        },
+        error: function (xhr) {
+            alert("Error!: " + xhr.responseText)
+        }
     });
 }

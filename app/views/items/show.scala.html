@@ -35,7 +35,9 @@
                             Haveしたユーザ
                         </div>
                         <div class="panel-body">
-                            xxx
+                        @for(user <- item.haveUsers) {
+                            <a href="@routes.UsersController.show(user.id.get)">@user.name</a>
+                        }
                         </div>
                     </div>
                 </div>

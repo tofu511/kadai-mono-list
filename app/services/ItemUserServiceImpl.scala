@@ -52,4 +52,46 @@ class ItemUserServiceImpl extends ItemUserService {
     ) == 1L
   }
 
+  override def have(userId: Long, itemId: Long): Boolean = DB.localTx { implicit session =>
+    if (isHavingById(userId, itemId)) false
+    else {
+      val now = ZonedDateTime.now()
+      val itemUser = ItemUser(
+        None,
+        itemId,
+        userId,
+        WantHaveType.Have.toString,
+        now,
+        now
+      )
+      ItemUser.create(itemUser) > 0L
+    }
+  }
+
+  override def doNotHave(userId: Long, itemId: Long): Boolean = DB.localTx { implicit session =>
+    if (!isHavingById(userId, itemId)) false
+    else {
+      val column = ItemUser.column
+      ItemUser.deleteBy(
+        sqls
+          .eq(column.itemId, itemId)
+          .and
+          .eq(column.userId, userId)
+          .and
+          .eq(column.`type`, WantHaveType.Have.toString)
+      ) == 1
+    }
+  }
+
+  private def isHavingById(userId: Long, itemId: Long)(implicit dBSession: DBSession): Boolean = {
+    val column = ItemUser.column
+    ItemUser.countBy(
+      sqls
+        .eq(column.itemId, itemId)
+        .and
+        .eq(column.userId, userId)
+        .and
+        .eq(column.`type`, WantHaveType.Have.toString)
+    ) == 1L
+  }
 }

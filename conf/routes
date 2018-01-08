@@ -11,6 +11,8 @@ GET     /items/index                controllers.ItemsController.index(keyword: O
 GET     /items/:id                  controllers.ItemsController.show(id: Long)
 POST    /items/want                 controllers.ItemUserController.want
 POST    /items/donotwant            controllers.ItemUserController.doNotWant
+POST    /items/have                 controllers.ItemUserController.have
+POST    /items/donothave            controllers.ItemUserController.doNotHave
 
 GET     /users/:id                  controllers.UsersController.show(id: Long)
 

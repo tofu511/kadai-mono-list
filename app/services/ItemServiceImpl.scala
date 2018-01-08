@@ -69,7 +69,7 @@ class ItemServiceImpl @Inject()(configuration: Configuration, actorSystemProvide
       case Some(item) => Future.successful(item)
       case None =>
         searchItemByItemCode(itemCode).map { item =>
-          val id = create(item).get
+          val id = createIfNot(item).get
           item.copy(id = Some(id))
         }
     }
@@ -94,8 +94,17 @@ class ItemServiceImpl @Inject()(configuration: Configuration, actorSystemProvide
     )
   }
 
-  private def create(item: Item)(implicit dBSession: DBSession): Try[Long] = Try {
-    Item.create(item)
+//  private def create(item: Item)(implicit dBSession: DBSession): Try[Long] = Try {
+//    Item.create(item)
+//  }
+
+  private def createIfNot(item: Item)(implicit dBSession: DBSession): Try[Long] = Try {
+    val itemId     = Item.findBy(sqls.eq(Item.defaultAlias.code, item.code)).map(_.id).getOrElse(Some(0L)).get
+    val hasCreated = itemId > 0L
+    if (hasCreated)
+      itemId
+    else
+      Item.create(item)
   }
 
   override def getItemsByUserId(userId: Long)(implicit dBSession: DBSession): Try[Seq[Item]] = Try {

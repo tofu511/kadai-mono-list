@@ -4,12 +4,23 @@
     @if(item.wantUsers.exists(_.id == currentUser.id)) {
         <button id="want@index" class="btn btn-success">Want</button>
         <script type="text/javascript" charset="UTF-8">
-            $('#want@index').on('click', function(e) {doNotWant($(this), '@{item.code}'); });
+            $('#want@index').on('click', function(e) { doNotWant($(this), '@{item.code}'); });
         </script>
     } else {
         <button id="want@index" class="btn btn-primary">Want It</button>
         <script type="text/javascript" charset="UTF-8">
                 $('#want@index').on('click', function(e) { want($(this), '@{item.code}'); });
             </script>
+    }
+    @if(item.haveUsers.exists(_.id == currentUser.id)) {
+        <button id="have@index" class="btn btn-success">Have</button>
+        <script type="text/javascript" charset="UTF-8">
+            $('#have@index').on('click', function(e) { doNotHave($(this), '@{item.code}'); });
+        </script>
+    } else {
+        <button id="have@index" class="btn btn-primary">Have It</button>
+        <script type="text/javascript" charset="UTF-8">
+            $('#have@index').on('click', function(e) { have($(this), '@{item.code}'); });
+        </script>
     }
 </div>
