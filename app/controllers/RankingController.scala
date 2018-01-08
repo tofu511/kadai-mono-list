@@ -28,6 +28,15 @@ class RankingController @Inject()(val userService: UserService,
       .getOrElse(InternalServerError(Messages("InternalError")))
   }
 
+  def have: Action[AnyContent] = StackAction { implicit request =>
+    val user = loggedIn
+    getItemsByRanking(WantHaveType.Have)
+      .map { item =>
+        Ok(views.html.ranking.have(user, item.map { case (item, count) => (item, Some(count)) }))
+      }
+      .getOrElse(InternalServerError(Messages("InternalError")))
+  }
+
   private def getItemsByRanking(`type`: WantHaveType.Value): Try[Seq[(Item, Int)]] = {
     itemService
       .getItemsByRanking(`type`)

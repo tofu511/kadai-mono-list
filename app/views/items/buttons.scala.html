@@ -15,12 +15,12 @@
     @if(item.haveUsers.exists(_.id == currentUser.id)) {
         <button id="have@index" class="btn btn-success">Have</button>
         <script type="text/javascript" charset="UTF-8">
-            $('#have@index').on('click', function(e) { doNotHave($(this), '@{item.code}'); });
+            $('#have@index').on('click', function(e) { doNotHave($(this), '@{item.code}', @reload); });
         </script>
     } else {
         <button id="have@index" class="btn btn-primary">Have It</button>
         <script type="text/javascript" charset="UTF-8">
-            $('#have@index').on('click', function(e) { have($(this), '@{item.code}'); });
+            $('#have@index').on('click', function(e) { have($(this), '@{item.code}', @reload); });
         </script>
     }
 </div>

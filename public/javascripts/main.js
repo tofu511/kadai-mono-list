@@ -24,7 +24,7 @@ function want(sender, itemCode, reloadFlg) {
     });
 }
 
-function have(sender, itemCode) {
+function have(sender, itemCode, reloadFlg) {
     var route = jsRoutes.controllers.ItemUserController.have();
     $.ajax({
         url: route.url,
@@ -37,7 +37,11 @@ function have(sender, itemCode) {
             $(sender).addClass("btn-success");
             $(sender).text("Have");
             $(sender).off('click');
-            $(sender).on('click', function(e) { doNotHave($(sender), itemCode); });
+            $(sender).on('click', function(e) { doNotHave($(sender), itemCode, reloadFlg); });
+
+            if (reloadFlg) {
+                location.reload();
+            }
         },
         error: function (xhr) {
             alert("Error!: " + xhr.responseText)
@@ -71,7 +75,7 @@ function doNotWant(sender, itemCode, reloadFlg) {
     });
 }
 
-function doNotHave(sender, itemCode) {
+function doNotHave(sender, itemCode, reloadFlg) {
     var route = jsRoutes.controllers.ItemUserController.doNotHave();
     $.ajax({
         url: route.url,
@@ -84,7 +88,11 @@ function doNotHave(sender, itemCode) {
             $(sender).addClass("btn-primary");
             $(sender).text("Have It");
             $(sender).off('click');
-            $(sender).on('click', function(e) { have($(sender), itemCode); });
+            $(sender).on('click', function(e) { have($(sender), itemCode, reloadFlg); });
+
+            if (reloadFlg) {
+                location.reload();
+            }
         },
         error: function (xhr) {
             alert("Error!: " + xhr.responseText)

@@ -95,10 +95,6 @@ class ItemServiceImpl @Inject()(configuration: Configuration, actorSystemProvide
     )
   }
 
-//  private def create(item: Item)(implicit dBSession: DBSession): Try[Long] = Try {
-//    Item.create(item)
-//  }
-
   private def createIfNot(item: Item)(implicit dBSession: DBSession): Try[Long] = Try {
     val itemId     = Item.findBy(sqls.eq(Item.defaultAlias.code, item.code)).map(_.id).getOrElse(Some(0L)).get
     val hasCreated = itemId > 0L
