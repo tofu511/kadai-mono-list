@@ -1,6 +1,6 @@
 package services
 
-import models.Item
+import models.{ Item, WantHaveType }
 import scalikejdbc.{ AutoSession, DBSession }
 
 import scala.concurrent.Future
@@ -19,4 +19,7 @@ trait ItemService {
   def getItemById(itemId: Long)(implicit dBSession: DBSession = AutoSession): Future[Option[Item]]
 
   def getLatestItems(limit: Int = 20): Try[Seq[Item]]
+
+  def getItemsByRanking(`type`: WantHaveType.Value)(implicit dBSession: DBSession = AutoSession): Try[Seq[(Item, Int)]]
+
 }
