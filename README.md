@@ -1,4 +1,4 @@
-# kadai-mono-list
+# mono-list
 
 ## 概要
 Scala, Playフレームワーク, 楽天市場商品検索APIを使用して作った商品検索アプリケーションです。
